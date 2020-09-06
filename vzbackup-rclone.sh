@@ -2,8 +2,9 @@
 
 ############ /START CONFIG
 
-dumpdir="/mnt/pve/pvebackups01/dump" # Set this to where your vzdump files are stored
+dumpdir="/var/lib/vz/dump" # Set this to where your vzdump files are stored
 MAX_AGE=3 # This is the age in days to keep local backup copies. Local backups older than this are deleted.
+GD_DRIVE_NAME="pve_backup"
 
 ############ /END CONFIG
 
@@ -21,7 +22,7 @@ if [[ ${COMMAND} == 'rehydrate' ]]; then
     echo "For example, today would be: $timepath"
     read -p 'Rehydrate Date => ' rehydrate
     rclone --config /root/.config/rclone/rclone.conf \
-    --drive-chunk-size=32M copy gd-backup_crypt:/$rehydrate $dumpdir \
+    --drive-chunk-size=32M copy $GD_DRIVE_NAME:/$rehydrate $dumpdir \
     -v --stats=60s --transfers=16 --checkers=16
 fi
 
@@ -37,7 +38,7 @@ if [[ ${COMMAND} == 'backup-end' ]]; then
     echo "rcloning $rclonedir"
     #ls $rclonedir
     rclone --config /root/.config/rclone/rclone.conf \
-    --drive-chunk-size=32M copy $tarfile gd-backup_crypt:/$timepath \
+    --drive-chunk-size=32M copy $tarfile $GD_DRIVE_NAME:/$timepath \
     -v --stats=60s --transfers=16 --checkers=16
 fi
 
@@ -74,7 +75,7 @@ if [[ ${COMMAND} == 'job-end' ||  ${COMMAND} == 'job-abort' ]]; then
     echo "rcloning $_filename4"
     #ls $rclonedir
     rclone --config /root/.config/rclone/rclone.conf \
-    --drive-chunk-size=32M move $_filename4 gd-backup_crypt:/$timepath \
+    --drive-chunk-size=32M move $_filename4 $GD_DRIVE_NAME:/$timepath \
     -v --stats=60s --transfers=16 --checkers=16
 
     #rm -rfv $rcloneroot
